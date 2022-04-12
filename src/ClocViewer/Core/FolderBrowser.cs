@@ -11,7 +11,7 @@ namespace ClocViewer.Core
             {
                 Description = $"Select a {name} folder",
                 UseDescriptionForTitle = true,
-                SelectedPath = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory) + Path.DirectorySeparatorChar,
+                //SelectedPath = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory) + Path.DirectorySeparatorChar,
                 ShowNewFolderButton = true
             };
 
