@@ -1,0 +1,15 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="ClocViewer.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="OptionsFile" Type="System.String" Scope="User">
+      <Value Profile="(Default)">ClocTools\ClocOptions.txt</Value>
+    </Setting>
+    <Setting Name="ClocExePath" Type="System.String" Scope="User">
+      <Value Profile="(Default)">ClocTools\cloc-1.92.exe</Value>
+    </Setting>
+    <Setting Name="ReportPath" Type="System.String" Scope="User">
+      <Value Profile="(Default)">%UserProfile%\Desktop</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

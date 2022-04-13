@@ -1,4 +1,6 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using ClocAnalyzerLibrary;
 using ClocViewer.Core;
 
@@ -119,6 +121,36 @@ namespace ClocViewer.ViewModels
             CodeCount = stats.Code;
             IgnoreReason = stats.IgnoreReason;
             IsIgnored = stats.IsIgnored;
+        }
+
+        public IReadOnlyCollection<LocAnalyseEntryViewModel> DecendantsAndSelf()
+        {
+            return new ReadOnlyCollection<LocAnalyseEntryViewModel>(DecendantsRecursive(this));
+        }
+
+        private List<LocAnalyseEntryViewModel> DecendantsRecursive(LocAnalyseEntryViewModel entry)
+        {
+            List<LocAnalyseEntryViewModel> childrenEntries = new();
+            if (entry == null || entry.Name == "..") return childrenEntries;
+            if (!entry.IsFolder) // File
+            {
+                childrenEntries.Add(entry);
+                return childrenEntries;
+            }
+
+            // Empty folder
+            if (entry.FileCount == 0) return childrenEntries;
+
+            var files = entry.Entries.Where(x => !x.IsFolder).OrderBy(x => x.Name);
+            childrenEntries.AddRange(files);
+
+            var folders = entry.Entries.Where(x => x.IsFolder).Where(x => x.Name != "..").OrderBy(x => x.Name);
+            foreach (var e in folders)
+            {
+                childrenEntries.AddRange(DecendantsRecursive(e));
+            }
+
+            return childrenEntries;
         }
     }
 }

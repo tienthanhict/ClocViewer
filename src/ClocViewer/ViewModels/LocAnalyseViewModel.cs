@@ -11,10 +11,12 @@ using System.Windows.Input;
 using ClocAnalyzerLibrary;
 using ClocViewer.Core;
 using Microsoft.Win32;
+using System.Configuration;
+using ClocViewer.Properties;
 
 namespace ClocViewer.ViewModels
 {
-    public class LocAnalyseViewModel : ObservableObject
+    public partial class LocAnalyseViewModel : ObservableObject
     {
         public LocAnalyseEntryViewModel Root { get; set; }
 
@@ -47,6 +49,11 @@ namespace ClocViewer.ViewModels
             get => GetValue<string>();
             set => SetValue(value);
         }
+        public string ReportPath
+        {
+            get => GetValue<string>();
+            set => SetValue(value);
+        }
 
         public LocAnalyseEntryViewModel DisplayedEntry
         {
@@ -68,11 +75,18 @@ namespace ClocViewer.ViewModels
             set => SetValue(value);
         }
 
+        public bool IsBusy
+        {
+            get => GetValue<bool>();
+            set => SetValue(value);
+        }
+
         public ICommand MenuOpenCommand { get; }
         public ICommand MenuSaveCommand { get; }
         public ICommand MenuExitCommand { get; }
 
         public ICommand SourceBrowseCommand { get; }
+        public ICommand ReportBrowseCommand { get; }
         public ICommand ClocBrowseCommand { get; }
         public ICommand OptionsFileBrowseCommand { get; }
         public ICommand IgnoredFileBrowseCommand { get; }
@@ -81,10 +95,29 @@ namespace ClocViewer.ViewModels
         public ICommand MouseDoubleClickCommand { get; }
         public ICommand SelectionChangedCommand { get; }
         public ICommand CopyCommand { get; }
+        public ICommand SaveCsvCommand { get; }
 
         public LocAnalyseViewModel()
         {
             SelectedLanguages = new ObservableCollection<LanguageEntryViewModel>();
+
+            ClocPath = Settings.Default.ClocExePath;
+            if (string.IsNullOrEmpty(ClocPath) || !File.Exists(ClocPath))
+            {
+                ClocPath = Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), @"ClocTools\cloc-1.92.exe");
+            }
+
+            OptionsFilePath = Settings.Default.OptionsFile;
+            if (string.IsNullOrEmpty(OptionsFilePath) || !File.Exists(OptionsFilePath))
+            {
+                OptionsFilePath = Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), @"ClocTools\ClocOptions.txt");
+            }
+
+            ReportPath = Settings.Default.ReportPath;
+            if (string.IsNullOrEmpty(ReportPath) || !File.Exists(ReportPath))
+            {
+                ReportPath = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+            }
 
             MenuOpenCommand = new RelayCommand(o =>
             {
@@ -151,6 +184,11 @@ namespace ClocViewer.ViewModels
                 FolderBrowser.BrowseForFolder("source", (s) => SourcePath = s);
             });
 
+            ReportBrowseCommand = new RelayCommand(o =>
+            {
+                FolderBrowser.BrowseForFolder("report", (s) => ReportPath = s);
+            });
+
             ClocBrowseCommand = new RelayCommand(o =>
             {
                 var openFileDialog = new OpenFileDialog
@@ -158,9 +196,17 @@ namespace ClocViewer.ViewModels
                     Title = "Select the cloc.exe",
                     Filter = "Cloc Exe (*.exe)|*.exe"
                 };
+
+                FileInfo clocExe = new (Settings.Default.ClocExePath);
+                if (clocExe.Exists)
+                {
+                    openFileDialog.InitialDirectory = clocExe.DirectoryName;
+                }
+
                 if (openFileDialog.ShowDialog() == true)
                 {
                     ClocPath = openFileDialog.FileName;
+                    Settings.Default.ClocExePath = ClocPath;
                 }
             });
 
@@ -174,6 +220,7 @@ namespace ClocViewer.ViewModels
                 if (openFileDialog.ShowDialog() == true)
                 {
                     OptionsFilePath = openFileDialog.FileName;
+                    Settings.Default.OptionsFile = OptionsFilePath;
                 }
             });
 
@@ -192,18 +239,38 @@ namespace ClocViewer.ViewModels
 
             AnalyzeCommand = new RelayCommand(o =>
             {
-                var src = SourcePath;
-                var rootFolder = LocAnalyzer.Analyze(new LocAnalyzerSettings
+                if (string.IsNullOrWhiteSpace(SourcePath) || !Directory.Exists(SourcePath))
                 {
-                    RootPath = src,
-                    ClocExePath = ClocPath,
-                    IgnoredFile = IgnoredFilePath,
-                    OptionsFile = OptionsFilePath
-                });
-                Root = new LocAnalyseEntryViewModel(rootFolder, true);
-                DisplayedEntry = Root;
-                CurrentPath = rootFolder.FullPath;
-                SelectionText = "";
+                    MessageBox.Show($"Source Path is empty or invalid.","Source", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                try
+                {
+                    IsBusy = true;
+                    Settings.Default.Save();
+
+                    var src = SourcePath;
+                    var rootFolder = LocAnalyzer.Analyze(new LocAnalyzerSettings
+                    {
+                        RootPath = src,
+                        ClocExePath = ClocPath,
+                        IgnoredFile = IgnoredFilePath,
+                        OptionsFile = OptionsFilePath
+                    });
+                    Root = new LocAnalyseEntryViewModel(rootFolder, true);
+                    DisplayedEntry = Root;
+                    CurrentPath = rootFolder.FullPath;
+                    SelectionText = "";
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error occurred: {ex.Message}.\n\rPlease contact to the developer.", "Analyse", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                finally
+                {
+                    IsBusy = false;
+                }
             });
 
             MouseDoubleClickCommand = new RelayCommand(o =>
@@ -277,6 +344,33 @@ namespace ClocViewer.ViewModels
                     sb.AppendLine($"{item.Name};{item.CodeCount};{item.CommentCount};{item.BlankCount}");
                 }
                 Clipboard.SetText(sb.ToString());
+
+                MessageBox.Show($"Copy to clipboard completed!", "Clipboard", MessageBoxButton.OK, MessageBoxImage.Information);
+            });
+
+            SaveCsvCommand = new RelayCommand(o =>
+            {
+                try
+                {
+                    IsBusy = true;
+
+                    string removePrefixFolder = new DirectoryInfo(CurrentPath).Parent.FullName + "\\";
+
+                    var collection = Root.DecendantsAndSelf();
+
+                    SaveSummaryReport(collection);
+                    SaveDetailReport(collection);
+
+                    MessageBox.Show($"Save files completed!", "Csv", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error occurred: {ex.Message}.\n\rPlease contact to the developer.", "Csv", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                finally
+                {
+                    IsBusy = false;
+                }
             });
         }
     }
