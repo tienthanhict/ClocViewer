@@ -75,6 +75,12 @@ namespace ClocViewer.ViewModels
             set => SetValue(value);
         }
 
+        public bool IsBusy
+        {
+            get => GetValue<bool>();
+            set => SetValue(value);
+        }
+
         public ICommand MenuOpenCommand { get; }
         public ICommand MenuSaveCommand { get; }
         public ICommand MenuExitCommand { get; }
@@ -94,8 +100,18 @@ namespace ClocViewer.ViewModels
         public LocAnalyseViewModel()
         {
             SelectedLanguages = new ObservableCollection<LanguageEntryViewModel>();
+
             ClocPath = Settings.Default.ClocExePath;
+            if (string.IsNullOrEmpty(ClocPath) || !File.Exists(ClocPath))
+            {
+                ClocPath = Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), @"ClocTools\cloc-1.92.exe");
+            }
+
             OptionsFilePath = Settings.Default.OptionsFile;
+            if (string.IsNullOrEmpty(ClocPath) || !File.Exists(ClocPath))
+            {
+                OptionsFilePath = Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), @"ClocTools\ClocOptions.txt");
+            }
 
             MenuOpenCommand = new RelayCommand(o =>
             {
@@ -221,6 +237,8 @@ namespace ClocViewer.ViewModels
             {
                 try
                 {
+                    IsBusy = true;
+
                     var src = SourcePath;
                     var rootFolder = LocAnalyzer.Analyze(new LocAnalyzerSettings
                     {
@@ -237,6 +255,10 @@ namespace ClocViewer.ViewModels
                 catch (Exception ex)
                 {
                     MessageBox.Show($"Error occurred: {ex.Message}.\n\rPlease contact to the developer.");
+                }
+                finally
+                {
+                    IsBusy = false;
                 }
             });
 

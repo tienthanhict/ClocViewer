@@ -3,16 +3,10 @@
   <Profiles />
   <Settings>
     <Setting Name="OptionsFile" Type="System.String" Scope="User">
-      <Value Profile="(Default)">.\ClocTools\ClocOptions.txt</Value>
-    </Setting>
-    <Setting Name="ReportFile" Type="System.String" Scope="Application">
-      <Value Profile="(Default)" />
-    </Setting>
-    <Setting Name="LastOpenFolder" Type="System.String" Scope="Application">
-      <Value Profile="(Default)">E:\Source\Personal\ClocViewer</Value>
+      <Value Profile="(Default)">ClocTools\ClocOptions.txt</Value>
     </Setting>
     <Setting Name="ClocExePath" Type="System.String" Scope="User">
-      <Value Profile="(Default)">.\ClocTools\cloc-1.92.exe</Value>
+      <Value Profile="(Default)">ClocTools\cloc-1.92.exe</Value>
     </Setting>
   </Settings>
 </SettingsFile>

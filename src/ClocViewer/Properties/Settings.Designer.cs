@@ -25,7 +25,7 @@ namespace ClocViewer.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute(".\\ClocTools\\ClocOptions.txt")]
+        [global::System.Configuration.DefaultSettingValueAttribute("ClocTools\\ClocOptions.txt")]
         public string OptionsFile {
             get {
                 return ((string)(this["OptionsFile"]));
@@ -35,27 +35,9 @@ namespace ClocViewer.Properties {
             }
         }
         
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("")]
-        public string ReportFile {
-            get {
-                return ((string)(this["ReportFile"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("E:\\Source\\Personal\\ClocViewer")]
-        public string LastOpenFolder {
-            get {
-                return ((string)(this["LastOpenFolder"]));
-            }
-        }
-        
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute(".\\ClocTools\\cloc-1.92.exe")]
+        [global::System.Configuration.DefaultSettingValueAttribute("ClocTools\\cloc-1.92.exe")]
         public string ClocExePath {
             get {
                 return ((string)(this["ClocExePath"]));

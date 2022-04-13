@@ -5,8 +5,18 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:Behaviors="http://schemas.microsoft.com/xaml/behaviors"
         mc:Ignorable="d"
-        Title="Cloc Viewer" Height="750" Width="1300" ResizeMode="CanResizeWithGrip"
+        Title="Cloc Viewer (NTQ)" Height="750" Width="1300" ResizeMode="CanResizeWithGrip"
         FontSize="10pt">
+    <Window.Style>
+        <Style TargetType="Window">
+            <Setter Property="ForceCursor" Value="True"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsBusy}" Value="True">
+                    <Setter Property="Cursor" Value="Wait"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Style>
     <DockPanel>
         <Menu DockPanel.Dock="Top" FocusManager.IsFocusScope="False">
             <MenuItem Header="_File">
