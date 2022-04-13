@@ -26,7 +26,7 @@
                 <MenuItem Header="_Exit" Command="{Binding MenuExitCommand}" />
             </MenuItem>
         </Menu>
-        <StatusBar DockPanel.Dock="Bottom">
+        <StatusBar DockPanel.Dock="Bottom" Height="50">
             <StatusBarItem>
                 <Label>Selection</Label>
             </StatusBarItem>
@@ -35,8 +35,8 @@
             </StatusBarItem>
             <StatusBarItem HorizontalAlignment="Right">
                 <StackPanel Orientation="Horizontal">
-                    <Button CommandParameter="{Binding SelectedItems, ElementName=ContentGrid}" Command="{Binding CopyCommand}" Margin="15 0 0 0">Copy Selection</Button>
-                    <Button CommandParameter="{Binding Root}" Command="{Binding SaveCsvCommand}" Margin="15 0 5 0">Save to CSV</Button>
+                    <Button CommandParameter="{Binding Root}" Command="{Binding SaveCsvCommand}" Margin="15 0 5 0" Width="160" Height="40">Save to CSV</Button>
+                    <Button CommandParameter="{Binding SelectedItems, ElementName=ContentGrid}" Command="{Binding CopyCommand}" Margin="15 0 0 0" Width="160" Height="40">Copy Selection to Clipboard</Button>
                 </StackPanel>
             </StatusBarItem>
         </StatusBar>
@@ -69,7 +69,7 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="100"/>
                             </Grid.ColumnDefinitions>
-                            <Label Grid.Column="0" Grid.Row="0" Content="Cloc Path:"></Label>
+                            <Label Grid.Column="0" Grid.Row="0" Content="Cloc.exe Path:"></Label>
                             <Label Grid.Column="0" Grid.Row="1" Content="OptionsFile Path:"></Label>
                             <Label Grid.Column="0" Grid.Row="2" Content="IgnoredFile Path:"></Label>
                             <TextBox Grid.Column="1" Grid.Row="0" Text="{Binding ClocPath}"></TextBox>
@@ -106,7 +106,7 @@
                             <ColumnDefinition Width="100"/>
                         </Grid.ColumnDefinitions>
                         <Label Grid.Column="0" Grid.Row="1" Content="Report path:"></Label>
-                        <TextBox Grid.Column="1" Grid.Row="1" Text="{Binding ReportPath}" IsReadOnly="True"></TextBox>
+                        <TextBox Grid.Column="1" Grid.Row="1" Text="{Binding ReportPath}"></TextBox>
                         <Button Grid.Column="2" Grid.Row="1" Content="Browse" Command="{Binding ReportBrowseCommand}"></Button>
                     </Grid>
                     <Grid Grid.Row="2">

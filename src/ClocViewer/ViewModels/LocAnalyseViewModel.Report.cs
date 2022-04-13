@@ -41,7 +41,7 @@ namespace ClocViewer.ViewModels
 
             var sb = new StringBuilder();
             sb.Append("Language").Append(_csvDelimiter)
-                .Append("File").Append(_csvDelimiter)
+                .Append("File count").Append(_csvDelimiter)
                 .Append("Code").Append(_csvDelimiter)
                 .Append("Comment").Append(_csvDelimiter)
                 .Append("Blank").Append(_csvDelimiter)
@@ -91,7 +91,7 @@ namespace ClocViewer.ViewModels
             foreach (var item in fileEntries.Where(x => !x.IsIgnored))
             {
                 sb.Append(item.FileType).Append(_csvDelimiter)
-                    .Append(item.FullPath.Replace(prefixSourceFolder, "")).Append(_csvDelimiter)
+                    .Append(NormalizeCsvValue(item.FullPath.Replace(prefixSourceFolder, ""))).Append(_csvDelimiter)
                     .Append(item.CodeCount).Append(_csvDelimiter)
                     .Append(item.CommentCount).Append(_csvDelimiter)
                     .Append(item.BlankCount).Append(_csvDelimiter)
@@ -117,16 +117,22 @@ namespace ClocViewer.ViewModels
         private string GenerateReportFilePath(string reportName)
         {
             string reportFolder = ReportPath;
+            string sourceFolderName = new DirectoryInfo(Root.FullPath).Name;
 
             if (string.IsNullOrEmpty(ReportPath))
             {
-                reportFolder = CurrentPath;
+                reportFolder = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
             }
             if (!Directory.Exists(reportFolder))
             {
                 Directory.CreateDirectory(reportFolder);
             }
-            return Path.Combine(reportFolder, $"{Root.Name}_{reportName}_{DateTime.Now.ToString("yyyyMMdd_hhmm")}.csv");
+            return Path.Combine(reportFolder, $"{sourceFolderName}_{reportName}_{DateTime.Now.ToString("yyyyMMdd_hhmm")}.csv");
+        }
+
+        private string NormalizeCsvValue(string str)
+        {
+            return str.Contains(_csvDelimiter) ? $"\"{str}\"" : str;
         }
     }
 }

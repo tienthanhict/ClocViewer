@@ -1,0 +1,2 @@
+﻿--exclude-dir=.vs,packages
+#--not-match-d=(bin)|(obj)

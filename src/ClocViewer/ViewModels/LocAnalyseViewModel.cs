@@ -108,9 +108,15 @@ namespace ClocViewer.ViewModels
             }
 
             OptionsFilePath = Settings.Default.OptionsFile;
-            if (string.IsNullOrEmpty(ClocPath) || !File.Exists(ClocPath))
+            if (string.IsNullOrEmpty(OptionsFilePath) || !File.Exists(OptionsFilePath))
             {
                 OptionsFilePath = Path.Combine(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName), @"ClocTools\ClocOptions.txt");
+            }
+
+            ReportPath = Settings.Default.ReportPath;
+            if (string.IsNullOrEmpty(ReportPath) || !File.Exists(ReportPath))
+            {
+                ReportPath = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
             }
 
             MenuOpenCommand = new RelayCommand(o =>
@@ -201,7 +207,6 @@ namespace ClocViewer.ViewModels
                 {
                     ClocPath = openFileDialog.FileName;
                     Settings.Default.ClocExePath = ClocPath;
-                    Settings.Default.Save();
                 }
             });
 
@@ -216,7 +221,6 @@ namespace ClocViewer.ViewModels
                 {
                     OptionsFilePath = openFileDialog.FileName;
                     Settings.Default.OptionsFile = OptionsFilePath;
-                    Settings.Default.Save();
                 }
             });
 
@@ -235,9 +239,16 @@ namespace ClocViewer.ViewModels
 
             AnalyzeCommand = new RelayCommand(o =>
             {
+                if (string.IsNullOrWhiteSpace(SourcePath) || !Directory.Exists(SourcePath))
+                {
+                    MessageBox.Show($"Source Path is empty or invalid.","Source", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
                 try
                 {
                     IsBusy = true;
+                    Settings.Default.Save();
 
                     var src = SourcePath;
                     var rootFolder = LocAnalyzer.Analyze(new LocAnalyzerSettings
@@ -254,7 +265,7 @@ namespace ClocViewer.ViewModels
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Error occurred: {ex.Message}.\n\rPlease contact to the developer.");
+                    MessageBox.Show($"Error occurred: {ex.Message}.\n\rPlease contact to the developer.", "Analyse", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
                 finally
                 {
@@ -333,25 +344,33 @@ namespace ClocViewer.ViewModels
                     sb.AppendLine($"{item.Name};{item.CodeCount};{item.CommentCount};{item.BlankCount}");
                 }
                 Clipboard.SetText(sb.ToString());
+
+                MessageBox.Show($"Copy to clipboard completed!", "Clipboard", MessageBoxButton.OK, MessageBoxImage.Information);
             });
 
             SaveCsvCommand = new RelayCommand(o =>
             {
-                string removePrefixFolder = new DirectoryInfo(CurrentPath).Parent.FullName + "\\";
-
-                var collection = Root.DecendantsAndSelf();
-
-                SaveSummaryReport(collection);
-                SaveDetailReport(collection);
-
-                var sb = new StringBuilder();
-                sb.AppendLine("Language;Filename;Code;Comment;Blank;IsIgnore");
-                foreach (var item in collection)
+                try
                 {
-                    sb.AppendLine($"{item.FileType};{item.FullPath.Replace(removePrefixFolder, "")};{item.CodeCount};{item.CommentCount};{item.BlankCount};{item.IsIgnored}");
+                    IsBusy = true;
+
+                    string removePrefixFolder = new DirectoryInfo(CurrentPath).Parent.FullName + "\\";
+
+                    var collection = Root.DecendantsAndSelf();
+
+                    SaveSummaryReport(collection);
+                    SaveDetailReport(collection);
+
+                    MessageBox.Show($"Save files completed!", "Csv", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
-                Clipboard.SetText(sb.ToString());
-                //MessageBox.Show(sb.ToString());
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Error occurred: {ex.Message}.\n\rPlease contact to the developer.", "Csv", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                finally
+                {
+                    IsBusy = false;
+                }
             });
         }
     }

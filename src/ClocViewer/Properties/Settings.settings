@@ -8,5 +8,8 @@
     <Setting Name="ClocExePath" Type="System.String" Scope="User">
       <Value Profile="(Default)">ClocTools\cloc-1.92.exe</Value>
     </Setting>
+    <Setting Name="ReportPath" Type="System.String" Scope="User">
+      <Value Profile="(Default)">%UserProfile%\Desktop</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

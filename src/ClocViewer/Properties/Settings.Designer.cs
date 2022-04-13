@@ -46,5 +46,17 @@ namespace ClocViewer.Properties {
                 this["ClocExePath"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("%UserProfile%\\Desktop")]
+        public string ReportPath {
+            get {
+                return ((string)(this["ReportPath"]));
+            }
+            set {
+                this["ReportPath"] = value;
+            }
+        }
     }
 }
